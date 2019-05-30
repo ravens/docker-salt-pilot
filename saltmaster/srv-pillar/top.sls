@@ -1,0 +1,3 @@
+base:
+  'proxy':
+    - proxy-details
