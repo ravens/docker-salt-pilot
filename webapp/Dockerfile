@@ -6,4 +6,4 @@ RUN npm run build
 EXPOSE 3000
 ENV TZ=Europe/Madrid
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-CMD [ "npm", "startexpress" ]
+CMD [ "npm", "start" ]

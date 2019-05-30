@@ -12,6 +12,8 @@ services:
       - TZ=Europe/Madrid
     ports:
       - "3000:3000"
+    networks:
+      saltbackend:
 
   saltmaster:
     build: "./saltmaster"
@@ -21,7 +23,7 @@ services:
       - "./saltmaster/etc-salt-master.d:/etc/salt/master.d"
       - "./saltmaster/srv-salt:/srv/salt"
       - "./saltmaster/srv-pillar:/srv/pillar"
-      - "./saltmaster/etc-salt-pki:/etc/salt/pki"
+      #- "./saltmaster/etc-salt-pki:/etc/salt/pki"
     networks:
       saltbackend:
 
@@ -29,10 +31,7 @@ services:
     build: ./saltproxy
     volumes:
       - "./saltproxy/etc-salt/proxy:/etc/salt/proxy"
-      - "./saltproxy/etc-salt-pki:/etc/salt/pki" # save the key between relaunch
-    entrypoint:
-      - /usr/bin/salt-proxy
-      - --proxyid=proxy
+      #- "./saltproxy/etc-salt-pki:/etc/salt/pki" # save the key between relaunch
     networks:
       saltbackend:
 
