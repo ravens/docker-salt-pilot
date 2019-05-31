@@ -1,6 +1,10 @@
-const Index = () => (
+import React from 'react'
+
+import Dashboard from './Dashboard';
+
+export default () => (
   <div>
-    <p>Hello world</p>
+    <Dashboard />
   </div>
 )
-export default Index
+

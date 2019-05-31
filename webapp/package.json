@@ -13,9 +13,12 @@
   "author": "Yan Grunenberger <yan@grunenberger.net>",
   "license": "ISC",
   "dependencies": {
+    "@material-ui/core": "^4.0.1",
+    "@material-ui/icons": "^4.0.1",
     "express": "^4.17.1",
     "next": "^8.1.0",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "recharts": "^1.6.2"
   }
 }
