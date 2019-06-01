@@ -9,9 +9,9 @@ const handle = app.getRequestHandler()
 
 app.prepare()
 .then(() => {
-  const server = express()
-  const httpserver = http.createServer(server)
-  const io = socketIO(httpserver)
+  const expressapp = express()
+  const server = http.createServer(expressapp)
+  const io = socketIO(server)
 
   io.on('connection', socket => {
     console.log('Browser connected')
@@ -21,7 +21,7 @@ app.prepare()
     })
   })
 
-  server.get('*', (req, res) => {
+  expressapp.get('*', (req, res) => {
     return handle(req, res)
   })
 
