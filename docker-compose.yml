@@ -7,6 +7,8 @@ services:
 
   webapp:
     build: "./webapp"
+    depends_on:
+      - saltmaster
     environment:
       - NODE_ENV=production
       - TZ=Europe/Madrid
@@ -23,6 +25,7 @@ services:
       - "./saltmaster/etc-salt-master.d:/etc/salt/master.d"
       - "./saltmaster/srv-salt:/srv/salt"
       - "./saltmaster/srv-pillar:/srv/pillar"
+      - "./saltmaster/ws-salt-api-bridge.py:/root/ws-salt-api-bridge.py"
       #- "./saltmaster/etc-salt-pki:/etc/salt/pki"
     networks:
       saltbackend:
