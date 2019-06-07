@@ -17,8 +17,8 @@ RUN apt-get -qy install git
 RUN git clone https://github.com/erwindon/SaltGUI.git
 RUN mv SaltGUI/saltgui /srv
 
-RUN apt-get -qy install  python-pip
-RUN pip install gevent gevent-websocket bottle
+RUN apt-get -qy install python-pip
+RUN pip install python-socketio gevent
 COPY ws-salt-api-bridge.py /root/ 
 
 COPY salt-supervisor.conf /root/salt-supervisor.conf

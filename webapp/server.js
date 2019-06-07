@@ -9,7 +9,11 @@ const events = require('events');
 const EVENT_BROWSER_DISCONNECT  = "browser_disconnect";
 const EVENT_BROWSER_CONNECT   = "browser_connect";
 const EVENT_BROWSER_MESSAGE = "browser_message";
+const EVENT_SALT_DISCONNECT = "salt_disconnect";
+const EVENT_SALT_CONNECT = "salt_connect";
 const EVENT_SALT_MESSAGE = "salt_message";
+
+const SALT_MASTER="http://saltmaster:8000"
 
 var main_events_loop = new events.EventEmitter();
 
@@ -23,6 +27,7 @@ main_events_loop.on("event", function(event){
       case EVENT_BROWSER_DISCONNECT:
       console.log("Browser " + event.data.id + " just disconnected");
       break;
+
       case EVENT_BROWSER_CONNECT:
       console.log("Browser " + event.data.id + " just connected");
       break ;
@@ -31,8 +36,16 @@ main_events_loop.on("event", function(event){
       console.log("Browser " + event.data.id + " just sent " + event.data.data);
       break;
 
+      case EVENT_SALT_DISCONNECT:
+      console.log("Salt client just disconnected");
+      break;
+
+      case EVENT_SALT_CONNECT:
+      console.log("Salt client just connected");
+      break ;
+
       case EVENT_SALT_MESSAGE:
-      console.log("Salt event " + event.data.tag + " with data " + event.data.data);
+      console.log("Salt event " + event.data.tag + " with data " + util.inspect(event.data.data));
       break;
 
       default:
@@ -47,36 +60,20 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const WS_URL = 'ws://saltmaster:8000/websocket';
+var sioclient = require('socket.io-client');
+var saltsocket = new sioclient(SALT_MASTER);
 
-var W3CWebSocket = require('websocket').w3cwebsocket;
-var saltclient = new W3CWebSocket(WS_URL);
-var keepalive;
+saltsocket.on('connect', function(){
 
-saltclient.onerror = function() {
-  console.log('Connection error, retrying');
-  saltclient = new W3CWebSocket(WS_URL);
-};
+  main_events_loop.emit("event",{type : EVENT_SALT_CONNECT, data : saltsocket.id});
 
-saltclient.onopen = function() {
-  console.log('Salt client connected');
-
-};
-
-saltclient.onclose = function() {
-  console.log('Salt client closed');
-  saltclient = new W3CWebSocket(WS_URL);
-};
-
-
-
-saltclient.onmessage = function(evt) {
-
-  var data = JSON.parse(evt.data);
-
-  main_events_loop.emit("event",{type : EVENT_SALT_MESSAGE, data : data});
-
-};
+  saltsocket.on('message', function(data){
+    main_events_loop.emit("event",{type : EVENT_SALT_MESSAGE, data : JSON.parse(data)});
+  });
+  saltsocket.on('disconnect', function(){
+    main_events_loop.emit("event",{type : EVENT_SALT_DISCONNECT, data : saltsocket.id});
+  });
+});
 
 app.prepare()
 .then(() => {
@@ -86,6 +83,17 @@ app.prepare()
 
   io.on('connection', socket => {
    main_events_loop.emit("event",{type : EVENT_BROWSER_CONNECT, data : { id : socket.id }});
+
+
+   // repeating event to each browser
+   main_events_loop.on("event", function(event){
+
+    if (event && event.type == EVENT_SALT_MESSAGE)
+    {
+      socket.emit('message',event.data)
+    }
+
+   })
 
    socket.on('message', function (data) {
     main_events_loop.emit("event",{type : EVENT_BROWSER_MESSAGE, data : { id : socket.id, data : data }})
